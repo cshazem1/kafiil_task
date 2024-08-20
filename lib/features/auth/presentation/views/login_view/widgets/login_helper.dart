@@ -7,8 +7,9 @@ import '../../../../../../core/utils/theming/styles.dart';
 
 
 class LoginHelper extends StatefulWidget {
-
-  LoginHelper({
+  void Function(bool?)? onChanged;
+  LoginHelper({required this.onClickCheckBox,
+    required this.onChanged,
     super.key,
   });
   bool onClickCheckBox=false;
@@ -30,12 +31,7 @@ class _LoginHelperState extends State<LoginHelper> {
           Row(children: [
             Checkbox(
 
-              value: widget.onClickCheckBox, onChanged: (value) {
-              setState(() {
-                widget.onClickCheckBox=!widget.onClickCheckBox;
-
-              });
-            },
+              value: widget.onClickCheckBox, onChanged: widget.onChanged,
               activeColor: ColorManager.primary900,
             ),
             Text("Remember me",style: TextStyles.font12ColorGray500500Weight,)

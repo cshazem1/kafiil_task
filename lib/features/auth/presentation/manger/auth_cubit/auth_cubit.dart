@@ -5,6 +5,8 @@ import 'package:kafiil_task/features/auth/data/auth_repo/auth_repo.dart';
 import 'package:kafiil_task/features/auth/data/models/auth_model/auth_model.dart';
 import 'package:meta/meta.dart';
 
+import '../../../data/models/auth_model/LoginModels.dart';
+
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -17,7 +19,7 @@ AuthRepo authRepo ;
 result.fold((failure) {
 emit(LoginFailure(error: failure.message!));
 }, (data) {
-emit(LoginSuccess(authModel: data));
+emit(LoginSuccess(loginModels: data));
 },);
 
 
@@ -25,13 +27,32 @@ emit(LoginSuccess(authModel: data));
 
   register({Map<String,dynamic>?headers,Object? body}) async {
     emit(RegisterLoading());
-    var result=await authRepo.register(headers:headers ,body: body);
+    var result=await authRepo.register(headers:headers ,body: body,);
 result.fold((failure) {
   emit(RegisterFailure(error: failure.message!));
 }, (data) {
   emit(RegisterSuccess(data: data));
 },);
+
+
+
+
   }
 
+  whoAmI({ String ?token}) async {
+    emit(WhoAmILoading());
+    var result=await  authRepo.whoAMI(token:token);
+    result.fold((failure) {
+      emit(WhoAmIFailure(error: failure.message!));
+    }, (data) {
+      emit(WhoAmISuccess(loginModels: data));
+    },);
+
+
+  }
+  init(){
+    emit(AuthInitial());
+
+  }
 
 }

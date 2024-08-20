@@ -125,7 +125,6 @@ class _CountryItemsState extends State<CountryItems> {
             numberPages: widget.countryModels.pagination!.totalPages!,
             // shows only default arrows, no center content of paginator
             config: NumberPaginatorUIConfig(
-height: 50,
                 buttonPadding: REdgeInsets.all(0),
                 buttonUnselectedForegroundColor: Colors.black,
                 buttonUnselectedBackgroundColor: Colors.white,

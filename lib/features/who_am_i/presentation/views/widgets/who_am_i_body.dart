@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:camera/camera.dart';
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,13 +33,14 @@ class WhoAmIBody extends StatefulWidget {
 }
 
 class _WhoAmIBodyState extends State<WhoAmIBody> {
-
   @override
   void initState() {
     BlocProvider.of<DependentCubit>(context).fetchDependent();
 
     super.initState();
   }
+
+  XFile? galleryFile;
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +63,10 @@ class _WhoAmIBodyState extends State<WhoAmIBody> {
               height: 32.h,
             ),
             CustomCircleAvatar(
-              onTap: (p0) {
-                print(p0);
-              },
               registerModel: widget.authModel,
+              onTap: (file) async {
+                galleryFile = file;
+              },
             ),
             SizedBox(
               height: 16.h,
@@ -74,27 +76,27 @@ class _WhoAmIBodyState extends State<WhoAmIBody> {
               children: [
                 Flexible(
                     child: CustomTextField(
-                      onChanged: (p0) {
-                        widget.authModel.firstName = p0;
-                      },
-                      initialValue: widget.authModel.firstName,
-                      height: 16.h,
-                      textName: "First Name",
-                      password: false,
-                    )),
+                  onChanged: (p0) {
+                    widget.authModel.firstName = p0;
+                  },
+                  initialValue: widget.authModel.firstName,
+                  height: 16.h,
+                  textName: "First Name",
+                  password: false,
+                )),
                 SizedBox(
                   width: 8.w,
                 ),
                 Flexible(
                     child: CustomTextField(
-                      onChanged: (p0) {
-                        widget.authModel.lastName = p0;
-                      },
-                      initialValue: widget.authModel.lastName,
-                      height: 16.h,
-                      textName: "Last Name",
-                      password: false,
-                    )),
+                  onChanged: (p0) {
+                    widget.authModel.lastName = p0;
+                  },
+                  initialValue: widget.authModel.lastName,
+                  height: 16.h,
+                  textName: "Last Name",
+                  password: false,
+                )),
               ],
             ),
             SizedBox(
@@ -125,9 +127,7 @@ class _WhoAmIBodyState extends State<WhoAmIBody> {
               height: 16.h,
             ),
             UserTypeWidgets(
-              onValueChange: (p0) {
-
-              },
+              onValueChange: (p0) {},
               type: widget.authModel.type!.name!.toLowerCase(),
               onChangedName: (p0) {
                 print(p0);
@@ -194,71 +194,64 @@ class _WhoAmIBodyState extends State<WhoAmIBody> {
               height: 16.h,
             ),
             BlocBuilder<DependentCubit, DependentState>(
-
               builder: (context, state) {
-                if(state is DependentSuccess) {
+                if (state is DependentSuccess) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomSkills(
-                      tagsSelected: widget.authModel.tags,
-                    tags: state.dependenciesModels.data!.tags
-                      ,
-                      onSaved: (p0) {
-
-                      },
-                    ),
-                    SizedBox(
-                      height: 16.h,
-                    ),
-                    Text(
-                      "Favourite Social Media",
-                      style: TextStyles.font12ColorGray500500Weight
-                          .copyWith(fontSize: 12.sp),
-                    ),
-                    SizedBox(
-                      height: 16.h,
-                    ),
-                    SizedBox(
-                        height: 86.h,
-                        child: SizedBox(
+                    children: [
+                      CustomSkills(
+                        tagsSelected: widget.authModel.tags,
+                        tags: state.dependenciesModels.data!.tags,
+                        onSaved: (p0) {},
+                      ),
+                      SizedBox(
+                        height: 16.h,
+                      ),
+                      Text(
+                        "Favourite Social Media",
+                        style: TextStyles.font12ColorGray500500Weight
+                            .copyWith(fontSize: 12.sp),
+                      ),
+                      SizedBox(
+                        height: 16.h,
+                      ),
+                      SizedBox(
                           height: 86.h,
-                          child: ListView.builder(
-                            itemCount: state.dependenciesModels.data!.socialMedia!
-                                .length,
-                            padding: EdgeInsets.zero,
-                            itemBuilder: (context, index) {
-                              return SizedBox(
-                                height: 30.h,
-                                child: CustomCheckBoxFavourite(
-                                  select: widget.authModel.favoriteSocialMedia,
-                                  favoriteSelect: (favoriteName, isSelect) {
-                                    isSelect
-                                        ? favoriteSelect.add(favoriteName)
-                                        : favoriteSelect.remove(favoriteName);
-                                  },
-
-                                  socialMedia: state.dependenciesModels.data!
-                                      .socialMedia![index],
-                                ),
-                              );
-                            },),
-                        )
-                    ),
-                    SizedBox(
-                      height: 16.h,
-                    ),
-                  ],
-                );
-                }
-                else if(state is DependentFailure)
-                  {return Text(state.message);}
-                else
+                          child: SizedBox(
+                            height: 86.h,
+                            child: ListView.builder(
+                              itemCount: state
+                                  .dependenciesModels.data!.socialMedia!.length,
+                              padding: EdgeInsets.zero,
+                              itemBuilder: (context, index) {
+                                return SizedBox(
+                                  height: 30.h,
+                                  child: CustomCheckBoxFavourite(
+                                    select:
+                                        widget.authModel.favoriteSocialMedia,
+                                    favoriteSelect: (favoriteName, isSelect) {
+                                      isSelect
+                                          ? favoriteSelect.add(favoriteName)
+                                          : favoriteSelect.remove(favoriteName);
+                                    },
+                                    socialMedia: state.dependenciesModels.data!
+                                        .socialMedia![index],
+                                  ),
+                                );
+                              },
+                            ),
+                          )),
+                      SizedBox(
+                        height: 16.h,
+                      ),
+                    ],
+                  );
+                } else if (state is DependentFailure) {
+                  return Text(state.message);
+                } else
                   return const CircularProgressIndicator();
               },
-
             ),
-
             SizedBox(
               height: 16.h,
             ),

@@ -1,18 +1,26 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kafiil_task/core/utils/assets.dart';
+import 'package:kafiil_task/core/utils/routers/app_routes.dart';
 import 'package:kafiil_task/core/utils/theming/colors.dart';
 import 'package:kafiil_task/core/utils/theming/styles.dart';
+import 'package:kafiil_task/features/auth/data/models/auth_model/LoginModels.dart';
 import 'package:kafiil_task/features/auth/data/models/auth_model/auth_model.dart';
 import 'package:kafiil_task/features/auth/presentation/manger/auth_cubit/auth_cubit.dart';
+import 'package:kafiil_task/features/auth/presentation/views/login_view/login_view.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:shimmer/shimmer.dart';
 
+import '../../../../../../core/utils/methods.dart';
 import '../../../../../../core/utils/routers/routes.dart';
 import '../../../../../../core/widgets/custom_app_bar.dart';
 
@@ -22,8 +30,11 @@ import '../../../../../../main.dart';
 import 'login_helper.dart';
 
 class LoginBody extends StatefulWidget {
-  const LoginBody({
-    super.key,   });
+  bool isRemember = false;
+
+   LoginBody({
+    super.key,
+  });
 
   @override
   State<LoginBody> createState() => _LoginBodyState();
@@ -35,7 +46,20 @@ class _LoginBodyState extends State<LoginBody> {
   final GlobalKey<FormState> globalKey = GlobalKey();
   TextEditingController? emailController = TextEditingController();
   TextEditingController? passwordController = TextEditingController();
-  bool isLoading = false;
+  bool isLoading =false;
+  String? tokn1;
+  @override
+  void initState() {
+
+    getToken();
+    print("object");
+
+
+    super.initState();
+  }
+
+  final storage = const FlutterSecureStorage();
+
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
@@ -86,46 +110,72 @@ class _LoginBodyState extends State<LoginBody> {
                 SizedBox(
                   height: 10.h,
                 ),
-                LoginHelper(),
+                LoginHelper(
+onClickCheckBox: widget.isRemember,
+                  onChanged: (p0) {
+  setState(() {
+
+  });
+                    widget.isRemember = p0!;
+                    print(widget.isRemember);
+                  },
+                ),
                 SizedBox(
                   height: 32.h,
                 ),
                 BlocListener<AuthCubit, AuthState>(
-                  listener: (context, state) {
+                  listener: (context, state) async {
                     log(state.toString());
                     if (state is LoginFailure) {
-                      ScaffoldMessenger.of(context).showSnackBar( SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(state.error),
                       ));
                       isLoading = false;
                       setState(() {});
                     } else if (state is LoginSuccess) {
+                      if (widget.isRemember) {
+                        storeToken(state.loginModels.accessToken!);
+                        print("sdfsfsf${state.loginModels.accessToken!}");
+                      }
+
                       isLoading = false;
                       setState(() {});
                       context.go(Routes.navBottomBarView,
-                          extra: state.authModel);
-                    } else if(state is LoginLoading){
+                          extra: state.loginModels.data);
+                    } else if (state is LoginLoading) {
                       isLoading = true;
-                      setState(() {
+                      setState(() {});
+                    } else if (state is RegisterFailure) {
+                      print(state.error);
+                    } else if (state is WhoAmIFailure) {
+                      isLoading = false;
+                      setState(() {});
+                    } else if (state is WhoAmISuccess) {
 
-                      });
+                      context.go(Routes.navBottomBarView, extra: state.loginModels.data);
 
                     }
                   },
-                  child: CustomButton(
-                    onClick: () {
-                      if (globalKey.currentState!.validate()) {
-                        {
-                          BlocProvider.of<AuthCubit>(context).login(
-                              email: emailController!.text,
-                              password: passwordController!.text);
-                        }
-                      } else {
-                        autoValidateMode = AutovalidateMode.always;
-                        setState(() {});
-                      }
-                    },
-                    text: "Login",
+                  child: Builder(
+                    builder: (context) {
+                      return CustomButton(
+                        onClick: () {
+                          if (globalKey.currentState!.validate()) {
+                            {
+                              print("${emailController!.text}: : : ${passwordController!.text}");
+BlocProvider.of<AuthCubit>(context).login(
+
+                                  email: emailController!.text,
+                                  password: passwordController!.text);
+                            }
+                          } else {
+                            autoValidateMode = AutovalidateMode.always;
+                            setState(() {});
+                          }
+                        },
+                        text: "Login",
+                      );
+                    }
                   ),
                 ),
                 SizedBox(
@@ -155,4 +205,20 @@ class _LoginBodyState extends State<LoginBody> {
       ),
     );
   }
+
+  Future<void> storeToken(String token) async {
+    await storage.write(key: 'access_token', value: token);
+  }
+
+  storeRemove() async {
+    await storage.delete(key: "access_token");
+  }
+
+  void getToken() async {
+    String? token = await storage.read(key: 'access_token');
+    token != null
+        ? BlocProvider.of<AuthCubit>(context).whoAmI(token: token)
+        : print("wow");
+  }
+
 }

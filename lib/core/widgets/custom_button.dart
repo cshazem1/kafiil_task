@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -5,12 +7,13 @@ import '../utils/theming/colors.dart';
 import '../utils/theming/styles.dart';
 
 class CustomButton extends StatelessWidget {
-   CustomButton({
+   CustomButton({this.buttonColor,
     super.key,
      this.onClick,
      required this.text
   });
  Function()? onClick;
+ Color?buttonColor;
  String text;
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,7 @@ class CustomButton extends StatelessWidget {
       child: Container(
         height: 56.h,
         decoration: BoxDecoration(
-            color: ColorManager.primary900,
+            color:buttonColor?? ColorManager.primary900,
             borderRadius: BorderRadius.circular(12)),
         child: Center(
             child: Text(

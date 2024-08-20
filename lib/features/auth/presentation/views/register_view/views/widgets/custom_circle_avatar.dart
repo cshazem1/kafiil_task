@@ -85,9 +85,12 @@ class _CustomCircleAvatarState extends State<CustomCircleAvatar> {
     ImageSource img,
   ) async {
     final pickedFile = await picker.pickImage(source: img);
+
     XFile? xFilePicked = pickedFile;
+    widget.registerModel.avatar=null;
     setState(
       () {
+
         galleryFile = File(pickedFile!.path);
         widget.registerModel.galleryFile = pickedFile;
         widget.onTap(pickedFile);

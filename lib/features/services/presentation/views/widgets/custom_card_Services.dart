@@ -49,6 +49,7 @@ class CustomCardServices extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(8.sp)),
                    ),
                   child: servicesData.mainImage!.isNotEmpty?CachedNetworkImage(
+                    fit: BoxFit.fill,
                     imageUrl: servicesData.mainImage!,
                     placeholder: (context, url) => Shimmer(child: Container(color: Colors.black,), gradient: const LinearGradient(colors: [
                       Colors.white70,
